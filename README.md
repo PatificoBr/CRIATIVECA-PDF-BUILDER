@@ -1,13 +1,13 @@
 # Criativeca PDF Builder
 
-Uma ferramenta profissional para transformar pastas de imagens em PDFs otimizados para impressão.
+Uma ferramenta para transformar pastas de imagens em PDFs para impressão.
 
 ## 🎯 Características
 
 - **Interface moderna** com CustomTkinter (tema escuro)
 - **Suporte a múltiplos formatos**: PNG, JPG, JPEG, WEBP
 - **Geração automática de capa** com logo e título
-- **Rodapé profissional** em todas as páginas
+- **Rodapé** em todas as páginas
 - **Validação completa** de imagens
 - **Ordenação natural** dos arquivos (001, 002, 003...)
 - **Otimização automática** do PDF
@@ -110,7 +110,8 @@ A capa é gerada automaticamente com:
 
 ## 📝 Licença
 
-Desenvolvido por Criativeca
+Desenvolvido por PatificoBr
+GitHub: https://github.com/PatificoBr
 
 ## 🤝 Suporte
 

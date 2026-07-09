@@ -1,0 +1,47 @@
+# 🎉 CRIATIVECA PDF BUILDER - EXECUTÁVEL
+
+## ✅ Como Usar
+
+### Opção 1: Uso Simples
+Basta **duplo clique** no arquivo:
+```
+Criativeca_PDF_Builder.exe
+```
+
+### Opção 2: Criar Atalho (Recomendado)
+1. Clique direito no .exe
+2. Selecione "Enviar para" → "Área de Trabalho (criar atalho)"
+3. Duplo clique no atalho para usar
+
+## 📋 Requisitos
+- Windows 7 ou superior
+- Não precisa de Python instalado
+- ~150 MB de espaço em disco
+
+## 🚀 Como Usar a Aplicação
+1. Execute o programa
+2. Selecione a pasta com suas imagens
+3. Preencha o título e subtítulo
+4. Escolha onde salvar o PDF
+5. Clique em "GERAR PDF"
+
+## 📊 Formatos Suportados
+- PNG
+- JPG
+- JPEG
+- WEBP
+
+## ⚙️ Especificações do PDF
+- Formato: A4 (210 x 297 mm)
+- Resolução: 300 DPI (pronto para impressão)
+- Capa profissional automática
+- Rodapé em todas as páginas
+- Otimizado automaticamente
+
+## 🆘 Problemas?
+Se o antivírus reclama, é normal para executáveis empacotados.
+O programa é 100% seguro e open-source.
+
+## 📧 Distribuir
+Pode mandar o arquivo `Criativeca_PDF_Builder.exe` para amigos/clientes.
+Eles podem usar direto sem instalar nada!

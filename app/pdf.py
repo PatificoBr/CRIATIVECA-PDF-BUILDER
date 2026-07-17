@@ -51,12 +51,13 @@ class PDFBuilder:
 
     def build(
         self,
-        image_paths: list[str],
-        output_path: str,
-        title: str,
-        subtitle: str,
-        logo_path: Optional[str] = None,
-    ) -> tuple[bool, str]:
+        image_paths,
+        output_path,
+        title,
+        subtitle,
+        logo_path=None,
+        optimize_images=True,
+    ):
 
         try:
 
@@ -64,6 +65,7 @@ class PDFBuilder:
                 return False, "Nenhuma imagem encontrada."
 
             self.logo_path = logo_path
+            self.optimize_images = optimize_images
 
             self.total_steps = len(image_paths) + 2
             self.current_step = 0
@@ -178,27 +180,27 @@ class PDFBuilder:
 
             with Image.open(image_path) as img:
 
-                if img.mode in ("RGBA", "LA", "P"):
+                if self.optimize_images:
 
-                    background = Image.new(
-                        "RGB",
-                        img.size,
-                        (255, 255, 255),
+                    img.info.pop("dpi", None)
+                    img.thumbnail(
+                        (2480, 3508),
+                        Image.LANCZOS,
                     )
 
-                    if img.mode == "RGBA":
-                        background.paste(
-                            img,
-                            mask=img.split()[-1],
-                        )
-                    else:
-                        background.paste(img)
+                    img = img.convert("L")
 
-                    img = background
+                    temp_image = image_path + "_temp.jpg"
 
-                if image_path.lower().endswith(".png") and img.mode == "RGB":
+                    img.save(
+                        temp_image,
+                        "JPEG",
+                        quality=88,
+                        optimize=True,
+                        progressive=True,
+                        dpi=(300, 300),
+                    )
 
-                    image_to_draw = image_path
 
                 else:
 
@@ -210,7 +212,7 @@ class PDFBuilder:
                         optimize=True,
                     )
 
-                    image_to_draw = temp_image
+                image_to_draw = temp_image
 
                 img_width, img_height = img.size
 
@@ -305,8 +307,11 @@ class PDFBuilder:
             doc.save(
                 output_path,
                 garbage=4,
-                deflate=True,
                 clean=True,
+                deflate=True,
+                deflate_images=True,
+                deflate_fonts=True,
+                use_objstms=1,
             )
 
             doc.close()

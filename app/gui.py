@@ -125,17 +125,37 @@ class PDFBuilderApp(ctk.CTk):
 
         self.optimize_checkbox = ctk.BooleanVar(value=True)
 
+        options_frame = ctk.CTkFrame(folder_frame)
+        options_frame.pack(fill="x", padx=10, pady=(5, 10))
+
         optimize_check = ctk.CTkCheckBox(
-            folder_frame,
-            text="Otimizar imagens (300 DPI)",
+            options_frame,
+            text="Otimizar imagens",
             variable=self.optimize_checkbox,
         )
+        optimize_check.grid(row=0, column=0, sticky="w", padx=(0,10))
 
-        optimize_check.pack(
-            anchor="w",
-            padx=10,
-            pady=(5, 10),
-        )
+        # DPI option
+        self.dpi_option = ctk.StringVar(value="300")
+        dpi_label = ctk.CTkLabel(options_frame, text="DPI:")
+        dpi_label.grid(row=0, column=1, sticky="w")
+        dpi_menu = ctk.CTkOptionMenu(options_frame, values=["72", "150", "300"], variable=self.dpi_option)
+        dpi_menu.grid(row=0, column=2, sticky="w", padx=(5, 20))
+
+        # Conversion mode
+        self.conversion_mode = ctk.StringVar(value="auto")
+        mode_label = ctk.CTkLabel(options_frame, text="Modo:")
+        mode_label.grid(row=0, column=3, sticky="w")
+        mode_menu = ctk.CTkOptionMenu(options_frame, values=["auto", "grayscale", "1-bit"], variable=self.conversion_mode)
+        mode_menu.grid(row=0, column=4, sticky="w", padx=(5, 20))
+
+        # JPEG quality slider
+        self.quality_var = ctk.IntVar(value=60)
+        quality_label = ctk.CTkLabel(options_frame, text="Qualidade JPEG:")
+        quality_label.grid(row=0, column=5, sticky="w")
+        quality_slider = ctk.CTkSlider(options_frame, from_=30, to=95, number_of_steps=65, command=lambda v: self.quality_var.set(int(float(v))))
+        quality_slider.set(self.quality_var.get())
+        quality_slider.grid(row=0, column=6, sticky="we", padx=(5,0))
 
         ctk.CTkButton(
             output_button_frame,
@@ -380,6 +400,9 @@ class PDFBuilderApp(ctk.CTk):
                 self.subtitle_entry.get(),
                 logo_path,
                 optimize_images=self.optimize_checkbox.get(),
+                dpi=int(self.dpi_option.get()),
+                jpeg_quality=int(self.quality_var.get()),
+                conversion_mode=self.conversion_mode.get(),
             )
 
             # Calcular tempo

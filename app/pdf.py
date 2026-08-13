@@ -57,6 +57,9 @@ class PDFBuilder:
         subtitle,
         logo_path=None,
         optimize_images=True,
+        dpi: int = 300,
+        jpeg_quality: int = 60,
+        conversion_mode: str = "auto",
     ):
 
         try:
@@ -66,6 +69,10 @@ class PDFBuilder:
 
             self.logo_path = logo_path
             self.optimize_images = optimize_images
+            self.dpi = int(dpi) if dpi else 300
+            self.jpeg_quality = int(jpeg_quality) if jpeg_quality else 60
+            # conversion_mode: 'auto', 'grayscale', '1-bit'
+            self.conversion_mode = (conversion_mode or "auto").lower()
 
             self.total_steps = len(image_paths) + 2
             self.current_step = 0
@@ -184,24 +191,33 @@ class PDFBuilder:
                 if self.optimize_images:
 
                     img.info.pop("dpi", None)
-                    img.thumbnail(
-                        (2480, 3508),
-                        Image.LANCZOS,
-                    )
 
-                    # Convert to grayscale first
+                    # Resize according to selected DPI (base size corresponds to 300 DPI)
+                    max_w = int(2480 * (self.dpi / 300))
+                    max_h = int(3508 * (self.dpi / 300))
+                    img.thumbnail((max_w, max_h), Image.LANCZOS)
+
+                    # Ensure grayscale when appropriate
                     img = img.convert("L")
 
-                    # Heuristic: if image is mostly white (line art), convert to 1-bit
-                    hist = img.histogram()
-                    total_pixels = sum(hist)
-                    if total_pixels == 0:
-                        white_ratio = 0
-                    else:
-                        white_pixels = sum(hist[200:256])
-                        white_ratio = white_pixels / total_pixels
+                    # Decide conversion based on user selection or automatic heuristic
+                    force_bw = self.conversion_mode in ("1-bit", "1bit", "bw")
+                    force_gray = self.conversion_mode == "grayscale"
 
-                    if white_ratio >= 0.90:
+                    if not force_bw and not force_gray:
+                        # Heuristic auto: if image is mostly white (line art), convert to 1-bit
+                        hist = img.histogram()
+                        total_pixels = sum(hist)
+                        if total_pixels == 0:
+                            white_ratio = 0
+                        else:
+                            white_pixels = sum(hist[200:256])
+                            white_ratio = white_pixels / total_pixels
+                        to_bw = white_ratio >= 0.90
+                    else:
+                        to_bw = force_bw
+
+                    if to_bw:
                         # Save as 1-bit PNG for extreme compression (good for line art)
                         temp_image = image_path + "_temp.png"
                         bw = img.point(lambda p: 255 if p > 128 else 0).convert("1")
@@ -212,15 +228,15 @@ class PDFBuilder:
                             compress_level=9,
                         )
                     else:
-                        # Save as grayscale JPEG with aggressive compression
+                        # Save as grayscale JPEG with configured quality and DPI
                         temp_image = image_path + "_temp.jpg"
                         img.save(
                             temp_image,
                             "JPEG",
-                            quality=60,
+                            quality=self.jpeg_quality,
                             optimize=True,
                             progressive=True,
-                            dpi=(150, 150),
+                            dpi=(self.dpi, self.dpi),
                         )
 
                 else:

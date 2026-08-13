@@ -117,6 +117,7 @@ class PDFBuilder:
             c = canvas.Canvas(
                 output_path,
                 pagesize=A4,
+                pageCompression=1,
             )
 
             c.setAuthor("PatificoBr")
@@ -188,19 +189,39 @@ class PDFBuilder:
                         Image.LANCZOS,
                     )
 
+                    # Convert to grayscale first
                     img = img.convert("L")
 
-                    temp_image = image_path + "_temp.jpg"
+                    # Heuristic: if image is mostly white (line art), convert to 1-bit
+                    hist = img.histogram()
+                    total_pixels = sum(hist)
+                    if total_pixels == 0:
+                        white_ratio = 0
+                    else:
+                        white_pixels = sum(hist[200:256])
+                        white_ratio = white_pixels / total_pixels
 
-                    img.save(
-                        temp_image,
-                        "JPEG",
-                        quality=88,
-                        optimize=True,
-                        progressive=True,
-                        dpi=(300, 300),
-                    )
-
+                    if white_ratio >= 0.90:
+                        # Save as 1-bit PNG for extreme compression (good for line art)
+                        temp_image = image_path + "_temp.png"
+                        bw = img.point(lambda p: 255 if p > 128 else 0).convert("1")
+                        bw.save(
+                            temp_image,
+                            "PNG",
+                            optimize=True,
+                            compress_level=9,
+                        )
+                    else:
+                        # Save as grayscale JPEG with aggressive compression
+                        temp_image = image_path + "_temp.jpg"
+                        img.save(
+                            temp_image,
+                            "JPEG",
+                            quality=60,
+                            optimize=True,
+                            progressive=True,
+                            dpi=(150, 150),
+                        )
 
                 else:
 
@@ -210,6 +231,7 @@ class PDFBuilder:
                         temp_image,
                         "PNG",
                         optimize=True,
+                        compress_level=9,
                     )
 
                 image_to_draw = temp_image
@@ -312,6 +334,7 @@ class PDFBuilder:
                 deflate_images=True,
                 deflate_fonts=True,
                 use_objstms=1,
+                linearize=True,
             )
 
             doc.close()
